@@ -1,0 +1,3 @@
+package: github.com/johnmccabe/mote
+import:
+- package: github.com/facchinm/go-serial-native

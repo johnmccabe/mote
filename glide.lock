@@ -1,0 +1,6 @@
+hash: b1270412f15559593695b0e977a98333c5bbef1b3230e33feb7f20c205fa529b
+updated: 2017-05-29T23:52:47.37461782+01:00
+imports:
+- name: github.com/facchinm/go-serial-native
+  version: 4e85274940f67cca6a4e72c914692d2fbb5fb1a7
+testImports: []
