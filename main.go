@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	serial "github.com/facchinm/go-serial-native"
+	serial "github.com/johnmccabe/go-serial-native"
 )
 
 // serial "github.com/mikepb/go-serial"
