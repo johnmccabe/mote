@@ -101,10 +101,13 @@ func NewMote(portName string) *Mote {
 	return &mote
 }
 
-// ConfigureChannel configures a channel
-// - param channel: Channel, either 1, 2, 3 or 4 corresponding to numbers on Mote
-// - param numPixels: Number of pixels to configure for this channel
-// - param gammaCorrection: Whether to enable gamma correction (default False)
+// ConfigureChannel configures a channel and takes the following parameters.
+//
+// - channel: Channel, either 1, 2, 3 or 4 corresponding to numbers on Mote
+//
+// - numPixels: Number of pixels to configure for this channel
+//
+// - gammaCorrection: Whether to enable gamma correction (default False)
 func (m *Mote) ConfigureChannel(channel, numPixels int, gammaCorrection bool) error {
 	if channel > 4 || channel < 1 {
 		return fmt.Errorf("Channel index must be between 1 and 4")
@@ -122,7 +125,6 @@ func (m *Mote) ConfigureChannel(channel, numPixels int, gammaCorrection bool) er
 		Flags:  ChannelFlags{GammaCorrection: gammaCorrection},
 	}
 	m.channels[channel-1] = &c
-	//log.Printf("channel: %d, numPixels: %d, gammaCorrection: %t, c: %v\n", channel, numPixels, gammaCorrection, c)
 
 	var b []byte
 	b = append(b, []byte("mote")...)
@@ -135,11 +137,7 @@ func (m *Mote) ConfigureChannel(channel, numPixels int, gammaCorrection bool) er
 	}
 	b = append(b, byte(gammaCorrectionVar))
 
-	// m.Port.Write([]byte("mote"))
-	// m.Port.Write([]byte("c"))
-	// fmt.Printf("Write to buffer: %v\n", b)
 	m.Port.Write(b)
-
 	return nil
 }
 
@@ -179,10 +177,6 @@ func (m *Mote) Show() {
 			b = append(b, byte(pixel.Red))
 		}
 	}
-
-	// m.Port.Write([]byte("mote"))
-	// m.Port.Write([]byte("o"))
-	// fmt.Printf("Write to buffer: %v\n", b)
 	m.Port.Write(b)
 }
 
