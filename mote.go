@@ -103,11 +103,9 @@ func NewMote(portName string) *Mote {
 
 // ConfigureChannel configures a channel and takes the following parameters.
 //
-// - channel: Channel, either 1, 2, 3 or 4 corresponding to numbers on Mote
-//
-// - numPixels: Number of pixels to configure for this channel
-//
-// - gammaCorrection: Whether to enable gamma correction (default False)
+//   - channel: Channel, either 1, 2, 3 or 4 corresponding to numbers on Mote
+//   - numPixels: Number of pixels to configure for this channel
+//   - gammaCorrection: Whether to enable gamma correction (default False)
 func (m *Mote) ConfigureChannel(channel, numPixels int, gammaCorrection bool) error {
 	if channel > 4 || channel < 1 {
 		return fmt.Errorf("Channel index must be between 1 and 4")
@@ -141,12 +139,13 @@ func (m *Mote) ConfigureChannel(channel, numPixels int, gammaCorrection bool) er
 	return nil
 }
 
-// SetPixel Set the RGB colour of a single pixel, on a single channel
-// - param channel: Channel, either 1, 2, 3 or 4 corresponding to numbers on Mote
-// - param index: Index of pixel to set, from 0 up
-// - param r: Amount of red: 0-255
-// - param g: Amount of green: 0-255
-// - param b: Amount of blue: 0-255
+// SetPixel Set the RGB colour of a single pixel, on a single channel.
+//
+//   - channel: Channel, either 1, 2, 3 or 4 corresponding to numbers on Mote
+//   - index: Index of pixel to set, from 0 up
+//   - r: Amount of red: 0-255
+//   - g: Amount of green: 0-255
+//   - b: Amount of blue: 0-255
 func (m *Mote) SetPixel(channel, index, r, g, b int) error {
 	if channel > 4 || channel < 1 {
 		return fmt.Errorf("channel index must be between 1 and 4")
