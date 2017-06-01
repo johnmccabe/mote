@@ -1,3 +1,4 @@
 package: github.com/johnmccabe/mote
 import:
 - package: github.com/johnmccabe/go-serial-native
+- package: github.com/lucasb-eyer/go-colorful
