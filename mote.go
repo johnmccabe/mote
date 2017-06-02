@@ -25,72 +25,50 @@ import (
 // clear
 // show
 
-// VID TODO
+// VID is the USB Vendor ID of the Pimoroni Mote
 const VID = 5840
 
-// PID TODO
+// PID is the USB Product ID of the Pimoroni Mote
 const PID = 2244
 
-// NAME TODO
-const NAME = "Mote USB Dock"
+// ProductName is the USB Product Name of the Pimoroni Mote
+const ProductName = "Mote USB Dock"
 
-// MAX_PIXELS TODO
-const MAX_PIXELS = 512
+// MaxPixels is the maximum addressable number of pixels across all channels
+const MaxPixels = 512
 
-// MAX_PIXELS_PER_CHANNEL TODO
-const MAX_PIXELS_PER_CHANNEL = int(MAX_PIXELS / 4)
+// MaxPixelsPerChannel is the maximum addressable number of pixels across a single channel
+const MaxPixelsPerChannel = int(MaxPixels / 4)
 
-// Mote TODO
+// Mote represents a connected Pimoroni Mote device
 type Mote struct {
 	PortName string
 	Port     *serial.Port
 	Channels [4]*Channel
 }
 
-// Pixel TODO
+// Pixel represents a single RGB pixel
 type Pixel struct {
 	Red, Green, Blue int
 }
 
-// Channel TODO
+// Channel represents a single channel on the Mote board
 type Channel struct {
-	Pixels []Pixel
-	Flags  ChannelFlags
-}
-
-// ChannelFlags TODO
-type ChannelFlags struct {
+	Pixels          []Pixel
 	GammaCorrection bool
-}
-
-func findSerialPort(v, p int, n string) *string {
-	ports, _ := serial.ListPorts()
-	if len(ports) == 0 {
-		return nil
-	}
-	for _, info := range ports {
-		name := info.Name()
-		if vid, pid, err := info.USBVIDPID(); err == nil {
-			if vid == v && pid == p {
-				log.Printf("found Mote connected to port: %s\n", name)
-				return &name
-			}
-		}
-	}
-	return nil
 }
 
 // NewMote creates a connection to a Mote device, communicating over USB serial.
 //
 // It will attach to the first available Mote device unless a non-empty string `port_name` is specified at init.
 //
-//   - port_name: override auto-detect and specify an explicit port to use. Must be a complete path ie: /dev/tty.usbmodem1234
+//   - portName: override auto-detect and specify an explicit port to use. Must be a complete path ie: /dev/tty.usbmodem1234
 func NewMote(portName string) *Mote {
 	mote := Mote{
 		PortName: portName,
 	}
 	if mote.PortName == "" {
-		mote.PortName = *findSerialPort(VID, PID, NAME)
+		mote.PortName = *findSerialPort(VID, PID, ProductName)
 	}
 	if mote.PortName == "" {
 		log.Fatal("unable to detect connected Mote")
@@ -116,13 +94,13 @@ func NewMote(portName string) *Mote {
 //
 //   - channel: Channel, either 1, 2, 3 or 4 corresponding to numbers on Mote
 //   - numPixels: Number of pixels to configure for this channel
-//   - gammaCorrection: Whether to enable gamma correction (default False)
+//   - gammaCorrection: Whether to enable gamma correction
 func (m *Mote) ConfigureChannel(channel, numPixels int, gammaCorrection bool) error {
 	if channel > 4 || channel < 1 {
 		return fmt.Errorf("channel index must be between 1 and 4")
 	}
-	if numPixels > MAX_PIXELS_PER_CHANNEL {
-		return fmt.Errorf("number of pixels can not be more than %d", MAX_PIXELS_PER_CHANNEL)
+	if numPixels > MaxPixelsPerChannel {
+		return fmt.Errorf("number of pixels can not be more than %d", MaxPixelsPerChannel)
 	}
 
 	p := []Pixel{}
@@ -130,8 +108,8 @@ func (m *Mote) ConfigureChannel(channel, numPixels int, gammaCorrection bool) er
 		p = append(p, Pixel{0, 0, 0})
 	}
 	c := Channel{
-		Pixels: p,
-		Flags:  ChannelFlags{GammaCorrection: gammaCorrection},
+		Pixels:          p,
+		GammaCorrection: gammaCorrection,
 	}
 	m.Channels[channel-1] = &c
 
@@ -226,4 +204,26 @@ func (m *Mote) ClearAll() error {
 func (m *Mote) Close() {
 	log.Printf("Closing port %v\n", m.PortName)
 	m.Port.Close()
+}
+
+func findSerialPort(v, p int, n string) *string {
+	ports, _ := serial.ListPorts()
+	if len(ports) == 0 {
+		return nil
+	}
+	for _, info := range ports {
+		portName := info.Name()
+		if vid, pid, err := info.USBVIDPID(); err == nil {
+			if vid == v && pid == p {
+				log.Printf("found Mote connected to port: %s\n", portName)
+				return &portName
+			}
+		}
+		product := info.USBProduct()
+		if product == ProductName {
+			log.Printf("found Mote connected to port: %s\n", portName)
+			return &portName
+		}
+	}
+	return nil
 }
