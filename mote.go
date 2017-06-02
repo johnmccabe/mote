@@ -16,15 +16,6 @@ import (
 	serial "github.com/johnmccabe/go-serial-native"
 )
 
-// __init__
-// find_serial_port
-// configure_channel
-// get_pixel_count
-// get_pixel
-// set_pixel
-// clear
-// show
-
 // VID is the USB Vendor ID of the Pimoroni Mote
 const VID = 5840
 
@@ -204,6 +195,34 @@ func (m *Mote) ClearAll() error {
 func (m *Mote) Close() {
 	log.Printf("Closing port %v\n", m.PortName)
 	m.Port.Close()
+}
+
+// GetPixelCount gets the number of pixels a channel is configured to use, taking the following parameters.
+//   - channel: Channel, either 1, 2 3 or 4 corresponding to numbers on Mote
+func (m *Mote) GetPixelCount(channel int) (int, error) {
+	if channel > 4 || channel < 1 {
+		return 0, fmt.Errorf("channel index must be between 1 and 4")
+	}
+	if m.Channels[channel-1] == nil {
+		return 0, fmt.Errorf("channel %d has not been set up", channel)
+	}
+	return len(m.Channels[channel-1].Pixels), nil
+}
+
+// GetPixel gets the RGB colour of a single pixel, on a single channel, taking the following parameters.
+//   - channel: Channel, either 1, 2, 3 or 4 corresponding to numbers on Mote
+//   - index: Index of pixel to set, from 0 up
+func (m *Mote) GetPixel(channel, index int) (Pixel, error) {
+	if channel > 4 || channel < 1 {
+		return Pixel{}, fmt.Errorf("channel index must be between 1 and 4")
+	}
+	if m.Channels[channel-1] == nil {
+		return Pixel{}, fmt.Errorf("channel %d has not been set up", channel)
+	}
+	if index >= len(m.Channels[channel-1].Pixels) {
+		return Pixel{}, fmt.Errorf("pixel index must be < %d", len(m.Channels[channel-1].Pixels))
+	}
+	return m.Channels[channel-1].Pixels[index], nil
 }
 
 func findSerialPort(v, p int, n string) *string {
