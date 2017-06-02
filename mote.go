@@ -1,7 +1,17 @@
+/*
+Package mote represents a connected Pimoroni Mote device, communicating over USB serial.
+
+It allows you to configure the 4 channels and set individual pixels.
+
+It is a port of the Pimoroni Mote Python library (https://github.com/pimoroni/mote).
+
+The Mote device can be obtained directly from Pimoroni (https://shop.pimoroni.com/products/mote).
+*/
 package mote
 
 import (
 	"fmt"
+	"log"
 
 	serial "github.com/johnmccabe/go-serial-native"
 )
@@ -34,7 +44,7 @@ const MAX_PIXELS_PER_CHANNEL = int(MAX_PIXELS / 4)
 type Mote struct {
 	PortName string
 	Port     *serial.Port
-	channels [4]*Channel
+	Channels [4]*Channel
 }
 
 // Pixel TODO
@@ -55,16 +65,14 @@ type ChannelFlags struct {
 
 func findSerialPort(v, p int, n string) *string {
 	ports, _ := serial.ListPorts()
-	//log.Printf("found %d ports\n", len(ports))
 	if len(ports) == 0 {
 		return nil
 	}
 	for _, info := range ports {
 		name := info.Name()
-		//log.Printf("port name: %v\n", name)
 		if vid, pid, err := info.USBVIDPID(); err == nil {
-			//log.Printf("VID: %v, PID: %v\n", vid, pid)
 			if vid == v && pid == p {
+				log.Printf("found Mote connected to port: %s\n", name)
 				return &name
 			}
 		}
@@ -72,7 +80,11 @@ func findSerialPort(v, p int, n string) *string {
 	return nil
 }
 
-// NewMote TODO
+// NewMote creates a connection to a Mote device, communicating over USB serial.
+//
+// It will attach to the first available Mote device unless a non-empty string `port_name` is specified at init.
+//
+//   - port_name: override auto-detect and specify an explicit port to use. Must be a complete path ie: /dev/tty.usbmodem1234
 func NewMote(portName string) *Mote {
 	mote := Mote{
 		PortName: portName,
@@ -81,7 +93,7 @@ func NewMote(portName string) *Mote {
 		mote.PortName = *findSerialPort(VID, PID, NAME)
 	}
 	if mote.PortName == "" {
-		//log.Fatal("unable to find Mote device")
+		log.Fatal("unable to detect connected Mote")
 	}
 
 	options := serial.RawOptions
@@ -91,7 +103,6 @@ func NewMote(portName string) *Mote {
 	options.Parity = serial.PARITY_NONE
 	options.StopBits = 1
 	options.FlowControl = 0
-	//log.Printf("Opening port %v\n", mote.PortName)
 	p, err := options.Open(mote.PortName)
 	if err != nil {
 		panic(err)
@@ -101,17 +112,17 @@ func NewMote(portName string) *Mote {
 	return &mote
 }
 
-// ConfigureChannel configures a channel and takes the following parameters.
+// ConfigureChannel configures a channel, taking the following parameters.
 //
 //   - channel: Channel, either 1, 2, 3 or 4 corresponding to numbers on Mote
 //   - numPixels: Number of pixels to configure for this channel
 //   - gammaCorrection: Whether to enable gamma correction (default False)
 func (m *Mote) ConfigureChannel(channel, numPixels int, gammaCorrection bool) error {
 	if channel > 4 || channel < 1 {
-		return fmt.Errorf("Channel index must be between 1 and 4")
+		return fmt.Errorf("channel index must be between 1 and 4")
 	}
 	if numPixels > MAX_PIXELS_PER_CHANNEL {
-		return fmt.Errorf("Number of pixels can not be more than %d", MAX_PIXELS_PER_CHANNEL)
+		return fmt.Errorf("number of pixels can not be more than %d", MAX_PIXELS_PER_CHANNEL)
 	}
 
 	p := []Pixel{}
@@ -122,7 +133,7 @@ func (m *Mote) ConfigureChannel(channel, numPixels int, gammaCorrection bool) er
 		Pixels: p,
 		Flags:  ChannelFlags{GammaCorrection: gammaCorrection},
 	}
-	m.channels[channel-1] = &c
+	m.Channels[channel-1] = &c
 
 	var b []byte
 	b = append(b, []byte("mote")...)
@@ -139,7 +150,7 @@ func (m *Mote) ConfigureChannel(channel, numPixels int, gammaCorrection bool) er
 	return nil
 }
 
-// SetPixel Set the RGB colour of a single pixel, on a single channel.
+// SetPixel Set the RGB colour of a single pixel, on a single channel, taking the following parameters.
 //
 //   - channel: Channel, either 1, 2, 3 or 4 corresponding to numbers on Mote
 //   - index: Index of pixel to set, from 0 up
@@ -150,22 +161,22 @@ func (m *Mote) SetPixel(channel, index, r, g, b int) error {
 	if channel > 4 || channel < 1 {
 		return fmt.Errorf("channel index must be between 1 and 4")
 	}
-	if m.channels[channel-1] == nil {
+	if m.Channels[channel-1] == nil {
 		return fmt.Errorf("please set up channel %d before using it", channel)
 	}
-	if index >= len(m.channels[channel-1].Pixels) {
-		return fmt.Errorf("Pixel index must be < %d", m.channels[channel-1].Pixels)
+	if index >= len(m.Channels[channel-1].Pixels) {
+		return fmt.Errorf("Pixel index must be < %d", m.Channels[channel-1].Pixels)
 	}
-	m.channels[channel-1].Pixels[index] = Pixel{r & 0xff, g & 0xff, b & 0xff}
+	m.Channels[channel-1].Pixels[index] = Pixel{r & 0xff, g & 0xff, b & 0xff}
 	return nil
 }
 
-// Show send the pixel buffer to the hardware
+// Show sends the pixel buffer to the hardware.
 func (m *Mote) Show() {
 	var b []byte
 	b = append(b, []byte("mote")...)
 	b = append(b, []byte("o")...)
-	for channel, data := range m.channels {
+	for channel, data := range m.Channels {
 		if data == nil {
 			fmt.Printf("skipping empty channel %d\n", channel+1)
 			continue
@@ -179,8 +190,40 @@ func (m *Mote) Show() {
 	m.Port.Write(b)
 }
 
-// Close TODO
+// Clear the buffer of a specific channels, taking the following parameter.
+//
+//   - channel: Channel, either 1, 2, 3 or 4 corresponding to numbers on Mote
+func (m *Mote) Clear(channel int) error {
+	if channel > 4 || channel < 0 {
+		return fmt.Errorf("channel index must be between 1 and 4")
+	}
+	if m.Channels[channel-1] == nil {
+		return fmt.Errorf("please set up channel %d before using it", channel)
+	}
+	for pixel := 0; pixel < 16; pixel++ {
+		err := m.SetPixel(channel, pixel, 0, 0, 0)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ClearAll clears the buffers of all configured channels.
+func (m *Mote) ClearAll() error {
+	for channel := 1; channel < 5; channel++ {
+		if m.Channels[channel-1] != nil {
+			err := m.Clear(channel)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// Close closes the serial port connected to the Mote device.
 func (m *Mote) Close() {
-	//log.Printf("Closing port %v\n", m.PortName)
+	log.Printf("Closing port %v\n", m.PortName)
 	m.Port.Close()
 }
