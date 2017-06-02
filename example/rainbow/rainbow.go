@@ -1,7 +1,17 @@
+/*
+A simple animated rainbow example.
+
+This is a port of https://github.com/pimoroni/mote/blob/master/python/examples/rainbow.py
+*/
 package main
 
 import (
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
+
+	"fmt"
 
 	"github.com/johnmccabe/mote"
 	"github.com/lucasb-eyer/go-colorful"
@@ -9,7 +19,21 @@ import (
 
 func main() {
 	mote := mote.NewMote("")
-	defer mote.Close()
+
+	c := make(chan os.Signal, 2)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		mote.ClearAll()
+		mote.Show()
+		mote.Close()
+		fmt.Printf("EXITING: %v", mote)
+		for c := range mote.Channels {
+
+			fmt.Printf("CHAN: %v", c)
+		}
+		os.Exit(1)
+	}()
 
 	mote.ConfigureChannel(1, 16, false)
 	mote.ConfigureChannel(2, 16, false)
@@ -28,8 +52,16 @@ func main() {
 				mote.SetPixel(channel, pixel, r, g, b)
 			}
 		}
-
 		time.Sleep(10 * time.Millisecond)
 		mote.Show()
 	}
 }
+
+// func cleanup(m *mote.Mote) {
+// 	m.ClearAll()
+// 	fmt.Println("clear show")
+// 	m.Show()
+// 	time.Sleep(20 * time.Millisecond)
+
+// 	m.Close()
+// }

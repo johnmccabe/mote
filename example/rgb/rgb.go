@@ -1,3 +1,8 @@
+/*
+A simple static RGB colour setting example.
+
+This is a port of https://github.com/pimoroni/mote/blob/master/python/examples/rgb.py
+*/
 package main
 
 import (
@@ -8,10 +13,10 @@ import (
 
 func main() {
 	mote := mote.NewMote("")
-	mote.ConfigureChannel(1, 8, false)
-	// mote.ConfigureChannel(2, 16, false)
-	// mote.ConfigureChannel(3, 16, false)
-	// mote.ConfigureChannel(4, 16, false)
+	mote.ConfigureChannel(1, 16, false)
+	mote.ConfigureChannel(2, 16, false)
+	mote.ConfigureChannel(3, 16, false)
+	mote.ConfigureChannel(4, 16, false)
 
 	for channel := 1; channel < 5; channel++ {
 		for pixel := 0; pixel < 16; pixel++ {
@@ -21,9 +26,6 @@ func main() {
 	}
 
 	mote.Show()
-	// for channel in range(4):
-	// for pixel in range(16):
-	//     mote.set_pixel(channel + 1, pixel, r, g, b)
 	time.Sleep(100 * time.Millisecond)
 	mote.Close()
 }
