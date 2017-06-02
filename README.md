@@ -6,6 +6,8 @@
 
 This repo contains a port of the Pimoroni Mote library from Python to Go.
 
+![Work in progress](http://i.imgur.com/tLHCClRl.jpg)
+
 
 [Travis]: https://travis-ci.org/johnmccabe/mote
 [Travis Badge]: https://travis-ci.org/johnmccabe/mote.svg?branch=master
