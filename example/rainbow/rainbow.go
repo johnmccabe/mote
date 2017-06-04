@@ -41,7 +41,7 @@ func main() {
 	mote.ConfigureChannel(4, 16, false)
 
 	for {
-		t := int(float64(time.Now().UnixNano()) * 0.00000005)
+		t := int(int64(float64(time.Now().UnixNano()) * 0.00000005))
 		for channel := 1; channel < 5; channel++ {
 			for pixel := 0; pixel < 16; pixel++ {
 				hue := (t + (channel * 64) + (pixel * 4)) % 360
@@ -56,12 +56,3 @@ func main() {
 		mote.Show()
 	}
 }
-
-// func cleanup(m *mote.Mote) {
-// 	m.ClearAll()
-// 	fmt.Println("clear show")
-// 	m.Show()
-// 	time.Sleep(20 * time.Millisecond)
-
-// 	m.Close()
-// }
