@@ -1,11 +1,11 @@
+[![Travis Badge]][Travis]
+[![Go Report Card Badge]][Go Report Card]
+[![GoDoc Badge]][GoDoc]
+
 ![Mote](go-mote-logo.png)
 Buy the Mote controller & accessories here: https://shop.pimoroni.com/products/mote
 
 This repo contains a port of the [Pimoroni Mote library](https://github.com/pimoroni/mote) from Python to Go. It has been verified to work on OSX Sierra and Raspberry Pi 3 (Raspbian). Do let me know if you run on a different platform.
-
-[![Travis Badge]][Travis]
-[![Go Report Card Badge]][Go Report Card]
-[![GoDoc Badge]][GoDoc]
 
 # Prerequisites
 
