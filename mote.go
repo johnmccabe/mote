@@ -1,7 +1,7 @@
 /*
 Package mote represents a connected Pimoroni Mote device, communicating over USB serial.
 
-It allows you to configure the 4 channels and set individual pixels.
+It allows you to configure the 4 channels and set individual pixels, see the `examples` subdirectory for soem demo applications using the library.
 
 It is a port of the Pimoroni Mote Python library (https://github.com/pimoroni/mote).
 
