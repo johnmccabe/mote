@@ -25,17 +25,20 @@ const PID = 2244
 // ProductName is the USB Product Name of the Pimoroni Mote
 const ProductName = "Mote USB Dock"
 
+// NumChannels is the number of available channel connections on the Mote device
+const NumChannels = 4
+
 // MaxPixels is the maximum addressable number of pixels across all channels
 const MaxPixels = 512
 
 // MaxPixelsPerChannel is the maximum addressable number of pixels across a single channel
-const MaxPixelsPerChannel = int(MaxPixels / 4)
+const MaxPixelsPerChannel = int(MaxPixels / NumChannels)
 
 // Mote represents a connected Pimoroni Mote device
 type Mote struct {
 	PortName string
 	Port     *serial.Port
-	Channels [4]*Channel
+	Channels [NumChannels]*Channel
 }
 
 // Pixel represents a single RGB pixel
@@ -87,7 +90,7 @@ func NewMote(portName string) *Mote {
 //   - numPixels: Number of pixels to configure for this channel
 //   - gammaCorrection: Whether to enable gamma correction
 func (m *Mote) ConfigureChannel(channel, numPixels int, gammaCorrection bool) error {
-	if channel > 4 || channel < 1 {
+	if channel > NumChannels || channel < 1 {
 		return fmt.Errorf("channel index must be between 1 and 4")
 	}
 	if numPixels > MaxPixelsPerChannel {
@@ -115,7 +118,8 @@ func (m *Mote) ConfigureChannel(channel, numPixels int, gammaCorrection bool) er
 	}
 	b = append(b, byte(gammaCorrectionVar))
 
-	m.Port.Write(b)
+	a, err := m.Port.Write(b)
+	fmt.Printf("%v %v", a, err)
 	return nil
 }
 
@@ -127,7 +131,7 @@ func (m *Mote) ConfigureChannel(channel, numPixels int, gammaCorrection bool) er
 //   - g: Amount of green: 0-255
 //   - b: Amount of blue: 0-255
 func (m *Mote) SetPixel(channel, index, r, g, b int) error {
-	if channel > 4 || channel < 1 {
+	if channel > NumChannels || channel < 1 {
 		return fmt.Errorf("channel index must be between 1 and 4")
 	}
 	if m.Channels[channel-1] == nil {
@@ -163,7 +167,7 @@ func (m *Mote) Show() {
 //
 //   - channel: Channel, either 1, 2, 3 or 4 corresponding to numbers on Mote
 func (m *Mote) Clear(channel int) error {
-	if channel > 4 || channel < 0 {
+	if channel > NumChannels || channel < 0 {
 		return fmt.Errorf("channel index must be between 1 and 4")
 	}
 	if m.Channels[channel-1] == nil {
@@ -180,7 +184,7 @@ func (m *Mote) Clear(channel int) error {
 
 // ClearAll clears the buffers of all configured channels.
 func (m *Mote) ClearAll() error {
-	for channel := 1; channel < 5; channel++ {
+	for channel := 1; channel < NumChannels+1; channel++ {
 		if m.Channels[channel-1] != nil {
 			err := m.Clear(channel)
 			if err != nil {
@@ -200,7 +204,7 @@ func (m *Mote) Close() {
 // GetPixelCount gets the number of pixels a channel is configured to use, taking the following parameters.
 //   - channel: Channel, either 1, 2 3 or 4 corresponding to numbers on Mote
 func (m *Mote) GetPixelCount(channel int) (int, error) {
-	if channel > 4 || channel < 1 {
+	if channel > NumChannels || channel < 1 {
 		return 0, fmt.Errorf("channel index must be between 1 and 4")
 	}
 	if m.Channels[channel-1] == nil {
@@ -213,7 +217,7 @@ func (m *Mote) GetPixelCount(channel int) (int, error) {
 //   - channel: Channel, either 1, 2, 3 or 4 corresponding to numbers on Mote
 //   - index: Index of pixel to set, from 0 up
 func (m *Mote) GetPixel(channel, index int) (Pixel, error) {
-	if channel > 4 || channel < 1 {
+	if channel > NumChannels || channel < 1 {
 		return Pixel{}, fmt.Errorf("channel index must be between 1 and 4")
 	}
 	if m.Channels[channel-1] == nil {
