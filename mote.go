@@ -11,6 +11,7 @@ package mote
 
 import (
 	"fmt"
+	"io"
 	"log"
 
 	serial "github.com/johnmccabe/go-serial-native"
@@ -37,7 +38,7 @@ const MaxPixelsPerChannel = int(MaxPixels / NumChannels)
 // Mote represents a connected Pimoroni Mote device
 type Mote struct {
 	PortName string
-	Port     *serial.Port
+	Port     io.WriteCloser
 	Channels [NumChannels]*Channel
 }
 
@@ -118,8 +119,10 @@ func (m *Mote) ConfigureChannel(channel, numPixels int, gammaCorrection bool) er
 	}
 	b = append(b, byte(gammaCorrectionVar))
 
-	a, err := m.Port.Write(b)
-	fmt.Printf("%v %v", a, err)
+	_, err := m.Port.Write(b)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
