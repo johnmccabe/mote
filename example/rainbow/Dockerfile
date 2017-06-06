@@ -9,7 +9,7 @@ RUN glide install
 RUN go build example/rainbow/rainbow.go
 
 FROM arm32v6/alpine
-LABEL org.label-schema.docker.cmd "docker run -ti --device=/dev/ttyACM0 johnmccabe/mote-rainbow"
+LABEL org.label-schema.docker.cmd "docker run --device=/dev/ttyACM0 johnmccabe/mote-rainbow"
 LABEL org.label-schema.description "Run the Pimoroni Mote Rainbow example on your Raspberry Pi (arm32v6)"
 LABEL org.label-schema.url "https://github.com/johnmccabe/mote"
 COPY --from=0 /go/src/github.com/johnmccabe/mote/rainbow /rainbow
