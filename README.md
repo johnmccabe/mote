@@ -7,7 +7,7 @@ Buy the Mote controller & accessories here: https://shop.pimoroni.com/products/m
 
 This repo contains a port of the [Pimoroni Mote library](https://github.com/pimoroni/mote) from Python to Go. It has been verified to work on OSX Sierra and Raspberry Pi 3 (Raspbian). Do let me know if you run on a different platform.
 
-If you have a PHAT Mote go here: https://github.com/johnmccabe/mote-phat
+If you have a PHAT Mote go here: https://github.com/johnmccabe/motephat
 
 # Prerequisites
 
