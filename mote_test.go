@@ -71,7 +71,7 @@ type MockPort struct {
 }
 
 func (mp MockPort) Write(p []byte) (n int, err error) {
-	if bytes.Compare(p, mp.expected) != 0 {
+	if !bytes.Equal(p, mp.expected) {
 		return 0, fmt.Errorf("written data [%v] does not match expected data [%v]", p, mp.expected)
 	}
 	return len(p), nil
