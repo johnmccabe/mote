@@ -5,7 +5,7 @@ This is a port of https://github.com/pimoroni/mote/blob/master/python/examples/r
 
 You can set the colour of your Mote sticks by passing the RGB values as arguments.
 
-  go run rgb.go 255 255 255
+	go run rgb.go 255 255 255
 */
 package main
 

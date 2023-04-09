@@ -1,8 +1,0 @@
-hash: e5ca607f9db30dd92fa72086360406c057c27fd0f2daded9db74192229698518
-updated: 2017-06-01T07:42:03.443039+01:00
-imports:
-- name: github.com/johnmccabe/go-serial-native
-  version: 662d9761e0e45184f091c65ef23566584adb0778
-- name: github.com/lucasb-eyer/go-colorful
-  version: c900de9dbbc73129068f5af6a823068fc5f2308c
-testImports: []

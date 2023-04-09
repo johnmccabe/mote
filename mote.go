@@ -14,26 +14,24 @@ import (
 	"io"
 	"log"
 
-	serial "github.com/johnmccabe/go-serial-native"
+	"go.bug.st/serial"
+	"go.bug.st/serial/enumerator"
 )
 
-// VID is the USB Vendor ID of the Pimoroni Mote
-const VID = 5840
-
-// PID is the USB Product ID of the Pimoroni Mote
-const PID = 2244
-
-// ProductName is the USB Product Name of the Pimoroni Mote
-const ProductName = "Mote USB Dock"
-
-// NumChannels is the number of available channel connections on the Mote device
-const NumChannels = 4
-
-// MaxPixels is the maximum addressable number of pixels across all channels
-const MaxPixels = 512
-
-// MaxPixelsPerChannel is the maximum addressable number of pixels across a single channel
-const MaxPixelsPerChannel = int(MaxPixels / NumChannels)
+const (
+	// Pimoroni Mote USB Vendor ID
+	VID = "16d0"
+	// Pimoroni Mote USB Product ID
+	PID = "08c4"
+	// Pimoroni Mote USB Product Name
+	ProductName = "Mote USB Dock"
+	// NumChannels is the number of available channel connections on the Mote device
+	NumChannels = 4
+	// MaxPixels is the maximum addressable number of pixels across all channels
+	MaxPixels = 512
+	// MaxPixelsPerChannel is the maximum addressable number of pixels across a single channel
+	MaxPixelsPerChannel = int(MaxPixels / NumChannels)
+)
 
 // Mote represents a connected Pimoroni Mote device
 type Mote struct {
@@ -63,20 +61,20 @@ func NewMote(portName string) *Mote {
 		PortName: portName,
 	}
 	if mote.PortName == "" {
-		mote.PortName = *findSerialPort(VID, PID, ProductName)
+		mote.PortName = *findSerialPort(VID, PID)
 	}
 	if mote.PortName == "" {
 		log.Fatal("unable to detect connected Mote")
 	}
 
-	options := serial.RawOptions
-	options.Mode = serial.MODE_WRITE
-	options.BitRate = 115200
-	options.DataBits = 8
-	options.Parity = serial.PARITY_NONE
-	options.StopBits = 1
-	options.FlowControl = 0
-	p, err := options.Open(mote.PortName)
+	mode := serial.Mode{
+		BaudRate: 115200,
+		DataBits: 8,
+		Parity:   serial.NoParity,
+		StopBits: serial.OneStopBit,
+	}
+
+	p, err := serial.Open(mote.PortName, &mode)
 	if err != nil {
 		panic(err)
 	}
@@ -232,23 +230,15 @@ func (m *Mote) GetPixel(channel, index int) (Pixel, error) {
 	return m.Channels[channel-1].Pixels[index], nil
 }
 
-func findSerialPort(v, p int, n string) *string {
-	ports, _ := serial.ListPorts()
+func findSerialPort(v, p string) *string {
+	ports, _ := enumerator.GetDetailedPortsList()
 	if len(ports) == 0 {
 		return nil
 	}
-	for _, info := range ports {
-		portName := info.Name()
-		if vid, pid, err := info.USBVIDPID(); err == nil {
-			if vid == v && pid == p {
-				log.Printf("found Mote connected to port: %s\n", portName)
-				return &portName
-			}
-		}
-		product := info.USBProduct()
-		if product == ProductName {
-			log.Printf("found Mote connected to port: %s\n", portName)
-			return &portName
+	for _, port := range ports {
+		if port.VID == v && port.PID == p {
+			log.Printf("found Mote connected to port: %s\n", port.Name)
+			return &port.Name
 		}
 	}
 	return nil
