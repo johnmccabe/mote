@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 
 	"go.bug.st/serial"
 	"go.bug.st/serial/enumerator"
@@ -236,7 +237,7 @@ func findSerialPort(v, p string) *string {
 		return nil
 	}
 	for _, port := range ports {
-		if port.VID == v && port.PID == p {
+		if strings.EqualFold(port.VID, v) && strings.EqualFold(port.PID, p) {
 			log.Printf("found Mote connected to port: %s\n", port.Name)
 			return &port.Name
 		}
